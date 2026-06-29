@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ponn Onam 2026 — Sponsor Pitch Builder (POC)</title>
+<style>
+  :root{
+    --navy:#0b1d3a; --navy-deep:#07142b; --gold:#c9a227; --gold-light:#e8c766;
+    --cream:#f7f3ea; --cream-dark:#efe7d4; --ink:#1a2233; --muted:#5b6478;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Segoe UI',Arial,sans-serif; background:var(--cream); color:var(--ink);}
+  header{background:var(--navy); color:#fff; padding:14px 28px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+  header img.org-logo{height:36px;}
+  header h1{margin:0; font-size:1.2rem;}
+  header h1 span{color:var(--gold-light);}
+  header a.admin-link{margin-left:auto; color:#cfd3e0; font-size:.85rem; text-decoration:none; border:1px solid rgba(255,255,255,.25); padding:7px 14px; border-radius:6px;}
+  header a.admin-link:hover{color:#fff; border-color:var(--gold);}
+  .layout{display:grid; grid-template-columns:300px 1fr 340px; gap:18px; padding:20px; max-width:1500px; margin:0 auto;}
+  .panel{background:#fff; border:1px solid var(--cream-dark); border-radius:10px; padding:16px;}
+  .panel h2{font-size:.95rem; text-transform:uppercase; letter-spacing:.5px; color:var(--navy); margin:0 0 12px;}
+  .cat{margin-bottom:18px;}
+  .cat h3{font-size:.78rem; color:var(--gold); text-transform:uppercase; margin:0 0 8px; letter-spacing:.5px;}
+  .card{
+    background:var(--cream); border:1px solid var(--cream-dark); border-radius:8px; padding:10px 12px;
+    margin-bottom:8px; cursor:grab; font-size:.85rem; font-weight:600; display:flex; justify-content:space-between; align-items:center; gap:8px;
+  }
+  .card:active{cursor:grabbing;}
+  .card.dragging{opacity:.4;}
+  .card .add-btn{background:var(--navy); color:#fff; border:none; border-radius:6px; padding:4px 9px; font-size:.75rem; cursor:pointer; flex-shrink:0;}
+  .card .add-btn:hover{background:var(--gold); color:var(--navy-deep);}
+  .card .icon{margin-right:6px;}
+
+  #dropzone{
+    min-height:300px; border:2px dashed var(--cream-dark); border-radius:10px; padding:14px; background:var(--cream);
+    display:flex; flex-direction:column; gap:10px; transition:background .2s, border-color .2s;
+  }
+  #dropzone.dragover{background:#fff7e0; border-color:var(--gold);}
+  #dropzone .empty-hint{color:var(--muted); text-align:center; margin:auto; font-size:.9rem;}
+
+  .selected-item{
+    background:#fff; border:1px solid var(--cream-dark); border-radius:8px; padding:10px 14px;
+    display:flex; justify-content:space-between; align-items:center; gap:10px; box-shadow:0 2px 6px -2px rgba(0,0,0,.08);
+  }
+  .selected-item .info{flex:1;}
+  .selected-item .name{font-weight:700; font-size:.92rem; color:var(--navy);}
+  .selected-item .cat-tag{font-size:.7rem; color:var(--gold); text-transform:uppercase; letter-spacing:.5px;}
+  .selected-item input.price{
+    width:90px; padding:6px 8px; border:1px solid var(--cream-dark); border-radius:6px; font-size:.85rem; text-align:right;
+  }
+  .selected-item .remove-btn{background:none; border:none; color:#b33; font-size:1.1rem; cursor:pointer; line-height:1;}
+  .selected-item .base-price{font-size:.72rem; color:var(--muted); text-decoration:line-through; margin-right:4px;}
+  .price-col{display:flex; flex-direction:column; align-items:flex-end;}
+
+  .logo-upload{
+    display:flex; align-items:center; gap:10px; border:1px dashed var(--cream-dark); border-radius:8px; padding:8px 10px; margin-top:4px;
+  }
+  .logo-upload img{height:36px; max-width:70px; object-fit:contain; border-radius:4px; background:#fff;}
+  .logo-upload .logo-placeholder{height:36px; width:36px; border-radius:4px; background:var(--cream); display:flex; align-items:center; justify-content:center; font-size:.9rem; color:var(--muted); flex-shrink:0;}
+  .logo-upload input[type=file]{font-size:.72rem; flex:1;}
+  .or-divider{font-size:.7rem; color:var(--muted); text-align:center; margin:6px 0;}
+
+  .sponsor-form label{display:block; font-size:.8rem; font-weight:700; color:var(--navy); margin-bottom:4px; margin-top:12px;}
+  .sponsor-form input, .sponsor-form select, .sponsor-form textarea{
+    width:100%; padding:9px 10px; border:1px solid var(--cream-dark); border-radius:6px; font-size:.88rem; font-family:inherit;
+  }
+  .summary-box{margin-top:18px; background:var(--navy); color:#fff; border-radius:10px; padding:16px;}
+  .summary-box .total-label{font-size:.78rem; color:var(--gold-light); text-transform:uppercase; letter-spacing:.5px;}
+  .summary-box .total-value{font-family:Georgia,serif; font-size:1.8rem; font-weight:800; color:var(--gold-light);}
+  .summary-box .subtotal-value{font-family:Georgia,serif; font-size:1.1rem; font-weight:700; color:#fff;}
+  .summary-box .gst-line{font-size:.78rem; color:#c7cce0; margin-top:4px;}
+  .summary-box .gst-line span{font-weight:700; color:#fff;}
+  .actions{display:flex; gap:10px; margin-top:14px;}
+  .btn{flex:1; padding:11px; border-radius:8px; border:none; font-weight:700; cursor:pointer; font-size:.85rem;}
+  .btn-primary{background:var(--gold); color:var(--navy-deep);}
+  .btn-secondary{background:transparent; border:1px solid var(--cream-dark); color:var(--navy);}
+
+  @media (max-width:1100px){
+    .layout{grid-template-columns:1fr; }
+  }
+
+  #dataSourceBanner{
+    max-width:1500px; margin:0 auto; padding:10px 28px; font-size:.82rem; color:#6b5400; background:#fff7e0; border-bottom:1px solid var(--gold);
+  }
+
+  /* ===== INFOGRAPHIC PREVIEW ===== */
+  #preview{display:none; max-width:980px; margin:30px auto 60px; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 20px 50px -20px rgba(11,29,58,.35);}
+  #preview.show{display:block;}
+
+  .pv-header{background:linear-gradient(135deg,var(--navy),var(--navy-deep)); color:#fff; padding:34px 40px;}
+  .pv-brand-row{display:flex; align-items:center; gap:14px; margin-bottom:18px;}
+  .pv-brand-row img{height:30px;}
+  .pv-brand-row .x{color:var(--gold-light); font-family:Georgia,serif; font-size:1.1rem;}
+  .pv-brand-row img.sponsor-logo-img{height:40px; max-width:140px; object-fit:contain; background:#fff; border-radius:6px; padding:4px 8px;}
+  .pv-header .pv-eyebrow{color:var(--gold-light); text-transform:uppercase; letter-spacing:2px; font-size:.75rem; font-weight:700;}
+  .pv-header h1{font-family:Georgia,serif; margin:6px 0 4px; font-size:1.9rem;}
+  .pv-header .pv-sub{color:#c7cce0; font-size:.95rem;}
+  .pv-header .pv-package-badge{
+    display:inline-block; margin-top:14px; background:var(--gold); color:var(--navy-deep); font-weight:800;
+    padding:7px 16px; border-radius:999px; font-size:.85rem;
+  }
+  .pv-dates{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
+  .pv-date-pill{
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.25); color:#e8e6df;
+    font-size:.78rem; font-weight:600; padding:6px 12px; border-radius:999px;
+  }
+
+  .pv-section{padding:30px 40px;}
+  .pv-section h2{font-family:Georgia,serif; color:var(--navy); font-size:1.25rem; margin:0 0 16px; border-left:4px solid var(--gold); padding-left:12px;}
+
+  /* venue photo with markers */
+  .venue-wrap{position:relative; border-radius:12px; overflow:hidden; box-shadow:0 10px 30px -12px rgba(0,0,0,.4);}
+  .venue-wrap img{width:100%; display:block;}
+  .marker{
+    position:absolute; transform:translate(-50%,-50%); display:flex; align-items:center; gap:6px; cursor:default;
+  }
+  .marker .dot{
+    width:26px; height:26px; border-radius:50%; background:var(--gold); border:3px solid #fff; box-shadow:0 0 0 4px rgba(201,162,39,.35);
+    display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--navy-deep); font-size:.75rem; flex-shrink:0;
+    animation:pulse 2.4s infinite;
+  }
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(201,162,39,.5);} 70%{box-shadow:0 0 0 10px rgba(201,162,39,0);} 100%{box-shadow:0 0 0 0 rgba(201,162,39,0);}}
+  .marker .label{
+    background:rgba(7,20,43,.88); color:#fff; font-size:.72rem; font-weight:700; padding:5px 10px; border-radius:6px; white-space:nowrap;
+  }
+  .marker.m-stage .label{color:var(--gold-light);}
+  .venue-caption{font-size:.78rem; color:var(--muted); margin-top:10px; text-align:center;}
+
+  /* stat strip */
+  .stat-strip{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:10px;}
+  .stat-tile{background:var(--cream); border:1px solid var(--cream-dark); border-radius:10px; padding:16px; text-align:center;}
+  .stat-tile .num{font-family:Georgia,serif; font-size:1.5rem; font-weight:800; color:var(--navy); display:block;}
+  .stat-tile .lbl{font-size:.72rem; color:var(--muted); margin-top:2px;}
+  .stat-tile.verified{border-color:var(--gold);}
+  .stat-tile.placeholder{opacity:.6; border-style:dashed;}
+  .fb-proof{display:flex; align-items:center; gap:14px; margin-top:14px; background:var(--cream); border:1px solid var(--cream-dark); border-radius:10px; padding:12px 16px;}
+  .fb-proof img{width:84px; height:84px; object-fit:cover; border-radius:8px; flex-shrink:0;}
+  .fb-proof .fb-text{font-size:.82rem; color:var(--muted);}
+  .fb-proof .fb-text strong{color:var(--navy); display:block; font-size:.95rem;}
+
+  /* offering cards grouped */
+  .offer-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px;}
+  .offer-card{
+    background:var(--cream); border:1px solid var(--cream-dark); border-radius:10px; padding:14px 16px; display:flex; gap:12px; align-items:flex-start;
+  }
+  .offer-card .ico{font-size:1.5rem; flex-shrink:0;}
+  .offer-card .name{font-weight:700; color:var(--navy); font-size:.92rem;}
+  .offer-card .meaning{font-size:.8rem; color:var(--muted); margin-top:3px;}
+  .offer-card .val{font-size:.78rem; color:var(--gold); font-weight:700; margin-top:6px;}
+  .offer-card .val .strike{color:var(--muted); text-decoration:line-through; font-weight:500; margin-right:6px;}
+
+  .pv-total-box{background:var(--navy); color:#fff; border-radius:12px; padding:22px 28px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;}
+  .pv-total-box .tl{font-size:.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--gold-light);}
+  .pv-total-box .tv{font-family:Georgia,serif; font-size:2.1rem; font-weight:800; color:#fff;}
+  .pv-total-box .pv-line{font-size:.82rem; color:#c7cce0; margin-top:4px;}
+  .pv-total-box .pv-line span{font-weight:700; color:#fff;}
+  .gst-note{font-size:.72rem; color:var(--muted); margin-top:10px; text-align:right;}
+  .pv-notes-box{margin-top:16px; font-size:.85rem; color:var(--muted); background:var(--cream); padding:14px 16px; border-radius:8px;}
+
+  .preview-actions{padding:0 40px 34px; display:flex; gap:12px;}
+
+  @media print{
+    header, .layout, .preview-actions{display:none !important;}
+    #preview{display:block !important; box-shadow:none; margin:0; max-width:100%;}
+  }
+  @media (max-width:700px){
+    .offer-grid, .stat-strip{grid-template-columns:1fr 1fr;}
+    .pv-header, .pv-section{padding:24px 20px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <img class="org-logo" src="logos/Thattakam Logo_yellow.png" alt="Thattakam logo" />
+  <h1><span>PONN ONAM 2026</span> — Sponsor Pitch Builder <small style="font-weight:400;color:#9aa0bc;">(internal tool / POC)</small></h1>
+  <a class="admin-link" href="admin.html">⚙ Pricing Viewer</a>
+</header>
+<div id="dataSourceBanner" style="display:none;"></div>
+
+<div class="layout">
+
+  <!-- LEFT: Library of offerings -->
+  <div class="panel" id="library">
+    <h2>Offering Library</h2>
+    <p style="font-size:.78rem;color:var(--muted);margin-top:-6px;">Drag a card to the builder, or tap “+”.</p>
+    <p id="libraryLoading" style="font-size:.85rem;color:var(--muted);">Loading offerings…</p>
+    <!-- categories injected by JS -->
+  </div>
+
+  <!-- MIDDLE: Drop zone / builder -->
+  <div class="panel">
+    <h2>Proposal Builder</h2>
+    <div id="dropzone">
+      <p class="empty-hint">Drag offerings here to build a custom sponsorship pitch.</p>
+    </div>
+  </div>
+
+  <!-- RIGHT: Sponsor info + summary -->
+  <div class="panel" id="rightPanel">
+    <h2>Sponsor Details</h2>
+    <div class="sponsor-form">
+      <label>Sponsor / Brand Name</label>
+      <input type="text" id="sponsorName" placeholder="e.g. Acme Builders" />
+      <label>Contact Person</label>
+      <input type="text" id="contactPerson" placeholder="Name" />
+      <label>Proposed Package Name</label>
+      <input type="text" id="packageName" placeholder="e.g. Custom Integrated Partner" />
+
+      <label>Sponsor Logo</label>
+      <div class="logo-upload">
+        <div class="logo-placeholder" id="logoPreviewWrap">🏢</div>
+        <input type="file" id="logoFile" accept="image/*" />
+      </div>
+      <div class="or-divider">— or —</div>
+      <label>Sponsor Website</label>
+      <input type="text" id="sponsorWebsite" placeholder="e.g. acmebuilders.com" />
+
+      <label>Notes for Sponsor</label>
+      <textarea id="notes" rows="3" placeholder="Any custom remarks..."></textarea>
+    </div>
+
+    <div class="summary-box">
+      <div class="total-label">Subtotal</div>
+      <div class="subtotal-value" id="subtotalValue">₹0</div>
+      <div class="gst-line">+ GST (<span id="gstRateLabel">18</span>%): <span id="gstValue">₹0</span></div>
+      <div class="total-label" style="margin-top:8px;">Total Payable</div>
+      <div class="total-value" id="totalValue">₹0</div>
+    </div>
+
+    <div class="actions no-print">
+      <button class="btn btn-secondary" id="clearBtn">Clear</button>
+      <button class="btn btn-primary" id="previewBtn">Generate Infographic</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== INFOGRAPHIC PREVIEW ===== -->
+<div id="preview">
+
+  <div class="pv-header">
+    <div class="pv-brand-row">
+      <img src="logos/Thattakam Logo_white.png" alt="Thattakam logo" />
+      <span class="x" id="pv-brand-x" style="display:none;">×</span>
+      <img id="pv-sponsor-logo" class="sponsor-logo-img" style="display:none;" alt="Sponsor logo" />
+    </div>
+    <div class="pv-eyebrow">PSN Thattakam · <span id="pv-event-name">Ponn Onam 2026</span> · Sponsorship Proposal</div>
+    <h1 id="pv-sponsor-name">Prepared for Sponsor</h1>
+    <div class="pv-sub" id="pv-contact"></div>
+    <div class="pv-package-badge" id="pv-package">Custom Sponsorship Package</div>
+    <div class="pv-dates">
+      <span class="pv-date-pill">🎉 Main Festival — <span id="pv-main-dates">Sep 4, 5 &amp; 6, 2026</span></span>
+      <span class="pv-date-pill">🏠 Property Expo — <span id="pv-expo-dates">Jul 25 &amp; 26, 2026</span></span>
+    </div>
+  </div>
+
+  <div class="pv-section">
+    <h2>The Venue — Your Brand, Front &amp; Centre</h2>
+    <div class="venue-wrap">
+      <img src="assets/venue-night.jpeg" alt="Ponn Onam 2026 venue at night" />
+      <div class="marker m-stage" style="left:16.7%; top:26%;">
+        <div class="dot">1</div>
+        <div class="label">Main Stage — Naming &amp; Branding</div>
+      </div>
+      <div class="marker m-display" style="left:53%; top:49%;">
+        <div class="dot">2</div>
+        <div class="label">LED Display — Visual Branding</div>
+      </div>
+      <div class="marker m-stall" style="left:81%; top:54%;">
+        <div class="dot">3</div>
+        <div class="label">Stall Space — Sponsor Booths</div>
+      </div>
+    </div>
+    <p class="venue-caption">Actual photo from PSN Onam — 11,000+ residents walk through this footprint over the 3 festival nights of Ponn Onam 2026 (Sep 4–6).</p>
+  </div>
+
+  <div class="pv-section">
+    <h2>What This Means for You — Reach &amp; Visibility</h2>
+    <div class="stat-strip">
+      <div class="stat-tile"><span class="num">11,000+</span><span class="lbl">Residents Engaged</span></div>
+      <div class="stat-tile"><span class="num">3,000+</span><span class="lbl">Homes Reached</span></div>
+      <div class="stat-tile"><span class="num">60-Day</span><span class="lbl">Engagement Window</span></div>
+      <div class="stat-tile verified"><span class="num">4,000+</span><span class="lbl">Community Group Members</span></div>
+    </div>
+    <div class="fb-proof">
+      <img src="assets/fb-group.jpg" alt="Prestige Shantiniketan Facebook groups" />
+      <div class="fb-text"><strong>Prestige Shantiniketan Facebook Groups</strong>Private community groups · 4.0K members — your brand's promotion is shared directly into this trusted resident channel, alongside WhatsApp groups and on-ground digital screens.</div>
+    </div>
+  </div>
+
+  <div class="pv-section">
+    <h2>Your Sponsorship Inclusions</h2>
+    <div class="offer-grid" id="pv-offer-grid"></div>
+  </div>
+
+  <div class="pv-section">
+    <div class="pv-total-box">
+      <div class="pv-total-breakdown">
+        <div class="tl">Total Sponsorship Investment</div>
+        <div class="pv-line">Subtotal: <span id="pv-subtotal">₹0</span></div>
+        <div class="pv-line">GST (<span id="pv-gst-rate-label">18</span>%): <span id="pv-gst">₹0</span></div>
+      </div>
+      <div class="tv" id="pv-total">₹0</div>
+    </div>
+    <p class="gst-note">All prices are exclusive of GST unless stated otherwise. GST shown above is calculated at <span id="pv-gst-rate-note">18</span>%.</p>
+    <div class="pv-notes-box" id="pv-notes" style="display:none;"></div>
+  </div>
+
+  <div class="preview-actions">
+    <button class="btn btn-secondary" id="backBtn">← Back to Builder</button>
+    <button class="btn btn-primary" id="printBtn">Print / Save as PDF</button>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="offerings-data.js"></script>
+<script>
+let OFFERINGS = {};
+let SETTINGS = { ...DEFAULT_SETTINGS };
+let GST_RATE = 0.18;
+
+let selected = []; // {name, cat, value, baseValue, meaning, icon}
+let dragData = null;
+let sponsorLogoSrc = ''; // dataURL (uploaded) or remote URL (website lookup)
+
+function applySettingsToDom(){
+  document.getElementById('gstRateLabel').textContent = SETTINGS.gstRatePercent;
+  document.getElementById('pv-event-name').textContent = SETTINGS.eventName;
+  document.getElementById('pv-main-dates').textContent = SETTINGS.mainEventDates;
+  document.getElementById('pv-expo-dates').textContent = SETTINGS.propertyExpoDates;
+  document.getElementById('pv-gst-rate-label').textContent = SETTINGS.gstRatePercent;
+  document.getElementById('pv-gst-rate-note').textContent = SETTINGS.gstRatePercent;
+}
+
+function showBannerIfFallback(offeringsResult, settingsResult){
+  const usedFallback = offeringsResult.source === 'default' || settingsResult.source === 'default';
+  if (!usedFallback) return;
+  const banner = document.getElementById('dataSourceBanner');
+  banner.style.display = 'block';
+  banner.textContent = '⚠ Could not load pricing-data.xlsx — showing bundled default pricing. '
+    + (offeringsResult.error || settingsResult.error || '');
+}
+
+async function init(){
+  const [offeringsResult, settingsResult] = await Promise.all([loadOfferingsAsync(), loadSettingsAsync()]);
+  OFFERINGS = offeringsResult.data;
+  SETTINGS = settingsResult.data;
+  GST_RATE = (SETTINGS.gstRatePercent || 0) / 100;
+
+  applySettingsToDom();
+  showBannerIfFallback(offeringsResult, settingsResult);
+
+  document.getElementById('libraryLoading').remove();
+  buildLibrary();
+  renderDropzone();
+}
+
+function buildLibrary(){
+  const lib = document.getElementById('library');
+  Object.entries(OFFERINGS).forEach(([cat, group]) => {
+    const catDiv = document.createElement('div');
+    catDiv.className = 'cat';
+    const h3 = document.createElement('h3');
+    h3.textContent = group.icon + ' ' + cat;
+    catDiv.appendChild(h3);
+    group.items.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.draggable = true;
+      card.innerHTML = `<span>${item.name}</span><button class="add-btn" type="button">+</button>`;
+      const payload = {name:item.name, cat, value:item.value, baseValue:item.value, meaning:item.meaning, icon:group.icon};
+      card.addEventListener('dragstart', (e) => {
+        dragData = payload;
+        card.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'copy';
+      });
+      card.addEventListener('dragend', () => card.classList.remove('dragging'));
+      card.querySelector('.add-btn').addEventListener('click', () => addItem(payload));
+      catDiv.appendChild(card);
+    });
+    lib.appendChild(catDiv);
+  });
+}
+
+function addItem(item){
+  selected.push({...item, id: Date.now() + Math.random()});
+  renderDropzone();
+}
+
+function removeItem(id){
+  selected = selected.filter(i => i.id !== id);
+  renderDropzone();
+}
+
+function renderDropzone(){
+  const dz = document.getElementById('dropzone');
+  dz.innerHTML = '';
+  if (selected.length === 0){
+    dz.innerHTML = '<p class="empty-hint">Drag offerings here to build a custom sponsorship pitch.</p>';
+  } else {
+    selected.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'selected-item';
+      const discounted = item.baseValue != null && item.value < item.baseValue;
+      row.innerHTML = `
+        <div class="info">
+          <div class="name">${item.icon} ${item.name}</div>
+          <div class="cat-tag">${item.cat}</div>
+        </div>
+        <div class="price-col">
+          ${discounted ? `<span class="base-price">₹${item.baseValue.toLocaleString('en-IN')}</span>` : ''}
+          <input type="number" class="price" value="${item.value}" data-id="${item.id}" />
+        </div>
+        <button class="remove-btn" type="button" data-id="${item.id}">✕</button>
+      `;
+      dz.appendChild(row);
+    });
+  }
+  dz.querySelectorAll('input.price').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      const id = parseFloat(e.target.dataset.id);
+      const found = selected.find(i => i.id === id);
+      if (found) found.value = parseFloat(e.target.value) || 0;
+      updateTotal();
+    });
+  });
+  dz.querySelectorAll('.remove-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => removeItem(parseFloat(e.target.dataset.id)));
+  });
+  updateTotal();
+}
+
+function updateTotal(){
+  const subtotal = selected.reduce((sum, i) => sum + (i.value || 0), 0);
+  const gst = subtotal * GST_RATE;
+  const total = subtotal + gst;
+  document.getElementById('subtotalValue').textContent = '₹' + subtotal.toLocaleString('en-IN');
+  document.getElementById('gstValue').textContent = '₹' + gst.toLocaleString('en-IN', {maximumFractionDigits:0});
+  document.getElementById('totalValue').textContent = '₹' + total.toLocaleString('en-IN', {maximumFractionDigits:0});
+}
+
+const dropzone = document.getElementById('dropzone');
+dropzone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropzone.classList.add('dragover');
+});
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  if (dragData) addItem(dragData);
+  dragData = null;
+});
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  if (confirm('Clear all selected offerings?')){
+    selected = [];
+    renderDropzone();
+  }
+});
+
+function setLogoPreview(src){
+  const wrap = document.getElementById('logoPreviewWrap');
+  if (src){
+    wrap.innerHTML = `<img src="${src}" alt="logo preview" onerror="this.parentElement.innerHTML='🏢'; sponsorLogoSrc='';" />`;
+  } else {
+    wrap.innerHTML = '🏢';
+  }
+}
+
+document.getElementById('logoFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    sponsorLogoSrc = ev.target.result;
+    document.getElementById('sponsorWebsite').value = '';
+    setLogoPreview(sponsorLogoSrc);
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('sponsorWebsite').addEventListener('input', (e) => {
+  const raw = e.target.value.trim();
+  if (!raw){ return; }
+  document.getElementById('logoFile').value = '';
+  const domain = raw.replace(/^https?:\/\//i, '').replace(/^www\./i, '').split('/')[0];
+  if (domain){
+    sponsorLogoSrc = `https://logo.clearbit.com/${domain}`;
+    setLogoPreview(sponsorLogoSrc);
+  }
+});
+
+function buildInfographic(){
+  const sponsorName = document.getElementById('sponsorName').value || 'Your Brand';
+  const contact = document.getElementById('contactPerson').value;
+  const pkg = document.getElementById('packageName').value || 'Custom Sponsorship Package';
+  const notes = document.getElementById('notes').value;
+
+  document.getElementById('pv-sponsor-name').textContent = 'Prepared for ' + sponsorName;
+  document.getElementById('pv-contact').textContent = contact ? 'Attn: ' + contact : '';
+  document.getElementById('pv-package').textContent = pkg;
+
+  const logoImg = document.getElementById('pv-sponsor-logo');
+  const brandX = document.getElementById('pv-brand-x');
+  if (sponsorLogoSrc){
+    logoImg.src = sponsorLogoSrc;
+    logoImg.style.display = 'inline-block';
+    brandX.style.display = 'inline-block';
+    logoImg.onerror = () => { logoImg.style.display = 'none'; brandX.style.display = 'none'; };
+  } else {
+    logoImg.style.display = 'none';
+    brandX.style.display = 'none';
+  }
+
+  const grid = document.getElementById('pv-offer-grid');
+  grid.innerHTML = '';
+  if (selected.length === 0){
+    grid.innerHTML = '<p style="color:#888;">No offerings selected yet — go back and add some from the library.</p>';
+  } else {
+    selected.forEach(item => {
+      const discounted = item.baseValue != null && item.value < item.baseValue;
+      const card = document.createElement('div');
+      card.className = 'offer-card';
+      card.innerHTML = `
+        <div class="ico">${item.icon}</div>
+        <div>
+          <div class="name">${item.name}</div>
+          <div class="meaning">${item.meaning || ''}</div>
+          <div class="val">${discounted ? `<span class="strike">₹${item.baseValue.toLocaleString('en-IN')}</span>` : ''}Value: ₹${(item.value||0).toLocaleString('en-IN')}</div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  const subtotal = selected.reduce((sum, i) => sum + (i.value || 0), 0);
+  const gst = subtotal * GST_RATE;
+  const total = subtotal + gst;
+  document.getElementById('pv-subtotal').textContent = '₹' + subtotal.toLocaleString('en-IN');
+  document.getElementById('pv-gst').textContent = '₹' + gst.toLocaleString('en-IN', {maximumFractionDigits:0});
+  document.getElementById('pv-total').textContent = '₹' + total.toLocaleString('en-IN', {maximumFractionDigits:0});
+
+  const notesBox = document.getElementById('pv-notes');
+  if (notes){
+    notesBox.style.display = 'block';
+    notesBox.textContent = 'Notes: ' + notes;
+  } else {
+    notesBox.style.display = 'none';
+  }
+
+  document.getElementById('preview').classList.add('show');
+  document.getElementById('preview').scrollIntoView({behavior:'smooth'});
+}
+
+document.getElementById('previewBtn').addEventListener('click', buildInfographic);
+document.getElementById('backBtn').addEventListener('click', () => {
+  document.getElementById('preview').classList.remove('show');
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+init();
+</script>
+</body>
+</html>

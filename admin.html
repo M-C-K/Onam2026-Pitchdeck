@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ponn Onam 2026 — Pricing Viewer</title>
+<style>
+  :root{
+    --navy:#0b1d3a; --navy-deep:#07142b; --gold:#c9a227; --gold-light:#e8c766;
+    --cream:#f7f3ea; --cream-dark:#efe7d4; --ink:#1a2233; --muted:#5b6478;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Segoe UI',Arial,sans-serif; background:var(--cream); color:var(--ink);}
+  header{background:var(--navy); color:#fff; padding:16px 28px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+  header img{height:34px;}
+  header h1{margin:0; font-size:1.1rem;}
+  header h1 span{color:var(--gold-light);}
+  header a.back{margin-left:auto; color:#cfd3e0; font-size:.85rem; text-decoration:none;}
+  header a.back:hover{color:#fff;}
+
+  .wrap{max-width:980px; margin:0 auto; padding:26px 20px 60px;}
+  .notice{background:#fff7e0; border:1px solid var(--gold); border-radius:8px; padding:12px 16px; font-size:.85rem; color:#6b5400; margin-bottom:20px;}
+  .notice.error{background:#fde8e8; border-color:#c44; color:#8a1f1f;}
+  .notice.ok{background:#e8f7ee; border-color:#1a7a3c; color:#155c2d;}
+
+  .toolbar{display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;}
+  .btn{padding:10px 18px; border-radius:8px; border:none; font-weight:700; cursor:pointer; font-size:.85rem; text-decoration:none; display:inline-block;}
+  .btn-primary{background:var(--gold); color:var(--navy-deep);}
+  .btn-secondary{background:transparent; border:1px solid var(--cream-dark); color:var(--navy);}
+
+  .settings-strip{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px;}
+  .settings-strip .tile{background:#fff; border:1px solid var(--cream-dark); border-radius:10px; padding:14px; text-align:center;}
+  .settings-strip .tile .v{font-family:Georgia,serif; font-weight:800; color:var(--navy); font-size:1.1rem; display:block;}
+  .settings-strip .tile .l{font-size:.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:.5px;}
+
+  .cat-block{background:#fff; border:1px solid var(--cream-dark); border-radius:10px; margin-bottom:18px; overflow:hidden;}
+  .cat-head{background:var(--navy); color:#fff; padding:12px 18px; font-weight:700; display:flex; align-items:center; gap:8px;}
+  table{width:100%; border-collapse:collapse;}
+  th{text-align:left; font-size:.72rem; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); padding:10px 18px; border-bottom:1px solid var(--cream-dark);}
+  td{padding:10px 18px; border-bottom:1px solid var(--cream-dark); vertical-align:top; font-size:.85rem;}
+  td.price{text-align:right; font-weight:700; color:var(--navy); white-space:nowrap;}
+  td.meaning{color:var(--muted); font-size:.8rem;}
+
+  details.setup{background:#fff; border:1px solid var(--cream-dark); border-radius:10px; padding:16px 20px; margin-top:30px;}
+  details.setup summary{font-weight:700; color:var(--navy); cursor:pointer;}
+  details.setup ol{margin:14px 0 0; padding-left:20px; font-size:.85rem; line-height:1.6;}
+  details.setup code{background:var(--cream); padding:2px 6px; border-radius:4px; font-size:.8rem;}
+  details.setup table.schema{margin-top:10px; font-size:.8rem;}
+  details.setup table.schema th, details.setup table.schema td{padding:6px 10px; border:1px solid var(--cream-dark);}
+</style>
+</head>
+<body>
+
+<header>
+  <img src="logos/Thattakam Logo_yellow.png" alt="Thattakam logo" />
+  <h1><span>PONN ONAM 2026</span> — Pricing Viewer</h1>
+  <a class="back" href="poc.html">← Back to Pitch Builder</a>
+</header>
+
+<div class="wrap">
+  <div id="statusNotice" class="notice">Loading…</div>
+
+  <div class="toolbar">
+    <button class="btn btn-primary" id="refreshBtn">↻ Refresh</button>
+    <a class="btn btn-secondary" id="editLink" href="pricing-data.xlsx" download>Download pricing-data.xlsx to Edit</a>
+  </div>
+
+  <div class="settings-strip" id="settingsStrip"></div>
+
+  <div id="catContainer"></div>
+
+  <details class="setup">
+    <summary>⚙ How to update pricing (click to expand)</summary>
+    <ol>
+      <li>Click <strong>"Download pricing-data.xlsx to Edit"</strong> above, or pull the latest from the repo, to get the current file.</li>
+      <li>Open it in Excel, LibreOffice, or even Google Sheets (upload it, edit, then re-export/download as .xlsx). It has two tabs:</li>
+      <li><code>Offerings</code> tab — one row per offering, columns:
+        <table class="schema">
+          <tr><th>category</th><th>icon</th><th>id</th><th>name</th><th>value</th><th>meaning</th></tr>
+          <tr><td>Digital &amp; Social</td><td>📱</td><td>social-media-promo</td><td>Social Media Promotions</td><td>25000</td><td>Your brand featured across...</td></tr>
+        </table>
+        <code>id</code> should be unique per row (lowercase, no spaces) — used internally to track items.
+      </li>
+      <li><code>Settings</code> tab — columns <code>key</code> / <code>value</code>, one row per setting:
+        <table class="schema">
+          <tr><th>key</th><th>value</th></tr>
+          <tr><td>gstRatePercent</td><td>18</td></tr>
+          <tr><td>eventName</td><td>Ponn Onam 2026</td></tr>
+          <tr><td>mainEventDates</td><td>Sep 4, 5 &amp; 6, 2026</td></tr>
+          <tr><td>propertyExpoDates</td><td>Jul 25 &amp; 26, 2026</td></tr>
+        </table>
+      </li>
+      <li>Save the file as <code>pricing-data.xlsx</code> (same filename), replace it in the <code>pitch-builder/</code> folder in the repo, then commit and push.</li>
+      <li>⚠ <strong>Only one person should edit at a time.</strong> This is a binary file in Git — if two people edit and push around the same time, the second push silently overwrites the first (no merge). Coordinate in chat before editing.</li>
+      <li>Changes go live for everyone the next time they load the site, once your commit is deployed.</li>
+    </ol>
+  </details>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="offerings-data.js"></script>
+<script>
+function fmt(n){ return '₹' + (n || 0).toLocaleString('en-IN'); }
+
+async function load(){
+  const statusEl = document.getElementById('statusNotice');
+  statusEl.className = 'notice';
+  statusEl.textContent = 'Loading pricing-data.xlsx…';
+
+  const [offeringsResult, settingsResult] = await Promise.all([loadOfferingsAsync(), loadSettingsAsync()]);
+  const data = offeringsResult.data;
+  const settings = settingsResult.data;
+
+  const usedFallback = offeringsResult.source === 'default' || settingsResult.source === 'default';
+  if (usedFallback){
+    statusEl.className = 'notice error';
+    statusEl.textContent = '⚠ Could not load pricing-data.xlsx — showing bundled default pricing as a fallback. '
+      + (offeringsResult.error || settingsResult.error || '');
+  } else {
+    statusEl.className = 'notice ok';
+    statusEl.textContent = '✓ Live data loaded from pricing-data.xlsx.';
+  }
+
+  const strip = document.getElementById('settingsStrip');
+  strip.innerHTML = `
+    <div class="tile"><span class="v">${settings.eventName}</span><span class="l">Event</span></div>
+    <div class="tile"><span class="v">${settings.gstRatePercent}%</span><span class="l">GST Rate</span></div>
+    <div class="tile"><span class="v">${settings.mainEventDates}</span><span class="l">Main Festival</span></div>
+    <div class="tile"><span class="v">${settings.propertyExpoDates}</span><span class="l">Property Expo</span></div>
+  `;
+
+  const container = document.getElementById('catContainer');
+  container.innerHTML = '';
+  Object.entries(data).forEach(([catName, group]) => {
+    const block = document.createElement('div');
+    block.className = 'cat-block';
+    block.innerHTML = `
+      <div class="cat-head"><span>${group.icon}</span><span>${catName}</span></div>
+      <table>
+        <thead><tr><th style="width:28%;">Offering</th><th>What it means for sponsor</th><th style="width:14%;">Base Price</th></tr></thead>
+        <tbody>
+          ${group.items.map(item => `
+            <tr>
+              <td>${item.name}</td>
+              <td class="meaning">${item.meaning || ''}</td>
+              <td class="price">${fmt(item.value)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+    container.appendChild(block);
+  });
+}
+
+document.getElementById('refreshBtn').addEventListener('click', load);
+load();
+</script>
+</body>
+</html>
