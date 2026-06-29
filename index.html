@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Ponn Onam 2026 — Sponsor Pitch Builder (POC)</title>
+<title>Ponn Onam 2026 — Sponsorship Proposal</title>
 <style>
   :root{
     --navy:#0b1d3a; --navy-deep:#07142b; --gold:#c9a227; --gold-light:#e8c766;
@@ -161,8 +161,14 @@
   .preview-actions{padding:0 40px 34px; display:flex; gap:12px;}
 
   @media print{
-    header, .layout, .preview-actions{display:none !important;}
+    header, .layout, .preview-actions, #dataSourceBanner{display:none !important;}
     #preview{display:block !important; box-shadow:none; margin:0; max-width:100%;}
+
+    .pv-header, .venue-wrap, .stat-strip, .fb-proof,
+    .offer-card, .pv-total-box, .pv-notes-box, .stat-tile{
+      break-inside:avoid; page-break-inside:avoid;
+    }
+    .pv-section h2{break-after:avoid; page-break-after:avoid;}
   }
   @media (max-width:700px){
     .offer-grid, .stat-strip{grid-template-columns:1fr 1fr;}
