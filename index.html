@@ -161,6 +161,11 @@
   .preview-actions{padding:0 40px 34px; display:flex; gap:12px;}
 
   @media print{
+    *, *::before, *::after{
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
     header, .layout, .preview-actions, #dataSourceBanner{display:none !important;}
     #preview{display:block !important; box-shadow:none; margin:0; max-width:100%;}
 
