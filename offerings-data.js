@@ -1,4 +1,4 @@
-// Shared data layer for poc.html (builder) and admin.html (live viewer).
+// Shared data layer for index.html (builder) and admin.html (live viewer).
 //
 // SOURCE OF TRUTH: pricing-data.xlsx, committed in this same folder in the
 // Git repo. It has two tabs: "Offerings" and "Settings" (same column schema
@@ -15,7 +15,7 @@
 // bundled DEFAULT_OFFERINGS / DEFAULT_SETTINGS below.
 const DATA_FILE_URL = "pricing-data.xlsx";
 
-// Requires SheetJS (loaded via <script> tag in poc.html / admin.html before this file).
+// Requires SheetJS (loaded via <script> tag in index.html / admin.html before this file).
 const XLSX_CDN_NOTE = "Loaded from https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
 
 // ---- Bundled fallback data (used until the Sheet is wired up, or if it's unreachable) ----
@@ -45,6 +45,7 @@ const DEFAULT_OFFERINGS = {
       { id: "mc-mentions", name: "MC Mentions / Announcements", value: 20000, meaning: "Live on-mic shoutouts from the event MC throughout the 3-day celebration." },
       { id: "naming-rights", name: "Main Event Naming Rights", value: 300000, meaning: "\"Ponn Onam 2026, presented by [Your Brand]\" — top-tier recall across every touchpoint." },
       { id: "photo-backdrop", name: "Photo-Op Backdrop Branding", value: 35000, meaning: "Your brand in the background of thousands of resident selfies and family photos, organically shared on social media." },
+      { id: "stall-main-event", name: "Stall Space — Main Event (2 nights)", value: 75000, meaning: "A branded stall at the main festival for 2 nights, engaging directly with 11,000+ residents at peak footfall." },
     ]
   },
   "Visuals & Activation": {
